@@ -1,41 +1,40 @@
 import pygame
-from game.game_engine import GameEngine
+import time
 
-# Initialize pygame/Start application
-pygame.init()
+WINNING_SCORE = 5  # default
 
-# Screen dimensions
-WIDTH, HEIGHT = 800, 600
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Ping Pong - Pygame Version")
+def show_game_over(screen, winner_text, screen_rect):
+    # Render dim overlay then text
+    overlay = pygame.Surface((screen_rect.width, screen_rect.height))
+    overlay.set_alpha(180)
+    overlay.fill((0,0,0))
+    screen.blit(overlay, (0,0))
 
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+    font = pygame.font.Font(None, 64)
+    text_surf = font.render(winner_text, True, (255,255,255))
+    text_rect = text_surf.get_rect(center=screen_rect.center)
+    screen.blit(text_surf, text_rect)
 
-# Clock
-clock = pygame.time.Clock()
-FPS = 60
+    small = pygame.font.Font(None, 32)
+    prompt = small.render("Press R to replay, or ESC to quit", True, (200,200,200))
+    p_rect = prompt.get_rect(center=(screen_rect.centerx, screen_rect.centery + 60))
+    screen.blit(prompt, p_rect)
 
-# Game loop
-engine = GameEngine(WIDTH, HEIGHT)
+    pygame.display.flip()
 
-def main():
-    running = True
-    while running:
-        SCREEN.fill(BLACK)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    # Wait inside a loop to keep window responsive
+    waiting = True
+    while waiting:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT:
+                pygame.quit()
+                raise SystemExit()
+            if ev.type == pygame.KEYDOWN:
+                if ev.key == pygame.K_r:
+                    return 'replay'
+                if ev.key == pygame.K_ESCAPE:
+                    return 'quit'
+        # small sleep to avoid busy loop
+        pygame.time.delay(50)
 
-        engine.handle_input()
-        engine.update()
-        engine.render(SCREEN)
-
-        pygame.display.flip()
-        clock.tick(FPS)
-
-    pygame.quit()
-
-if __name__ == "__main__":
     main()
